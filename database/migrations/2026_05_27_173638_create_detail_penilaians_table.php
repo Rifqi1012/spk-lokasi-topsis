@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('detail_penilaian', function (Blueprint $table) {
+            $table->id('detail_id');
+            $table->foreignId('penilaian_id')->constrained('penilaian', 'penilaian_id')->cascadeOnDelete();
+            $table->foreignId('kriteria_id')->constrained('kriteria', 'kriteria_id')->cascadeOnDelete();
+            $table->decimal('nilai', 10, 2);
+            $table->timestamps();
+
+            // Prevent duplicate criteria per evaluation
+            $table->unique(['penilaian_id', 'kriteria_id']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('detail_penilaian');
+    }
+};

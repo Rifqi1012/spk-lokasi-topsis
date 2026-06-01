@@ -1,0 +1,77 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\PermissionRegistrar;
+
+class RolePermissionSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // Reset cached roles and permissions
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Create Permissions
+        $permissions = [
+            'manage users',
+            'manage kriteria',
+            'manage lokasi',
+            'manage observasi',
+            'manage penilaian',
+            'process perhitungan',
+            'view hasil',
+            'view dashboard',
+            'view rekomendasi'
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
+
+        // Create Roles and Assign Permissions
+        $manajer = Role::firstOrCreate(['name' => 'manajer']);
+        $manajer->givePermissionTo([
+            'manage users',
+            'manage kriteria',
+            'manage lokasi',
+            'manage observasi',
+            'manage penilaian',
+            'process perhitungan',
+            'view hasil'
+        ]);
+
+        $direktur = Role::firstOrCreate(['name' => 'direktur']);
+        $direktur->givePermissionTo([
+            'view dashboard',
+            'view rekomendasi'
+        ]);
+
+        // Create Manajer User
+        $userManajer = User::firstOrCreate(
+            ['email' => 'manajer@saungaqiqah.com'],
+            [
+                'name' => 'Bapak Manajer',
+                'password' => Hash::make('password'),
+            ]
+        );
+        $userManajer->assignRole($manajer);
+
+        // Create Direktur User
+        $userDirektur = User::firstOrCreate(
+            ['email' => 'direktur@saungaqiqah.com'],
+            [
+                'name' => 'Bapak Direktur',
+                'password' => Hash::make('password'),
+            ]
+        );
+        $userDirektur->assignRole($direktur);
+    }
+}
