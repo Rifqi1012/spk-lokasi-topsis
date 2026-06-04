@@ -242,16 +242,3 @@ Beberapa ide pengembangan di masa depan untuk meningkatkan skalabilitas dan fung
 - 📊 **Data Visualization**: Grafik interaktif (misal: *Radar Chart*) untuk perbandingan komparatif lokasi A vs B.
 
 ---
-
-## 📝 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-<div align="center">
-  <b>Dikembangkan untuk Keperluan Skripsi / Tugas Akhir</b><br>
-  Dibuat dengan ❤️ oleh [Nama Anda]<br>
-  © 2026 Universitas [Nama Kampus]<br>
-  <i>Dokumentasi ini dibuat untuk merepresentasikan standar pengembangan perangkat lunak modern.</i>
-</div>
