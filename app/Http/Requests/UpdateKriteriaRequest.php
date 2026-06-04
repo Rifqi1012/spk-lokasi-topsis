@@ -23,6 +23,7 @@ class UpdateKriteriaRequest extends FormRequest
             'bobot' => ['required', 'numeric', 'min:0', 'max:100'],
             'atribut' => ['required', 'in:benefit,cost'],
             'jenis_input' => ['required', 'in:numeric,scoring'],
+            'urutan' => ['required', 'integer', 'min:1', Rule::unique('kriteria', 'urutan')->ignore($kriteriaId, 'kriteria_id')],
         ];
     }
 

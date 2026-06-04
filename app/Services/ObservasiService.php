@@ -68,8 +68,8 @@ class ObservasiService
 
     private function generatePenilaian(ObservasiLokasi $observasi, array $data, int $aksesScore, int $layakScore)
     {
-        // Fetch kriteria mapping
-        $kriteriaList = Kriteria::all()->keyBy('kode_kriteria');
+        // Fetch all criteria regardless of code, we will match by kunci_observasi
+        $kriteriaList = Kriteria::all();
 
         // Create Header
         $penilaian = Penilaian::create([
@@ -79,67 +79,29 @@ class ObservasiService
             'tanggal_penilaian' => now(),
         ]);
 
-        // Map values
+        // Map values dynamically
         $details = [];
         
-        if ($kriteriaList->has('C1')) {
-            $details[] = [
-                'penilaian_id' => $penilaian->penilaian_id,
-                'kriteria_id' => $kriteriaList['C1']->kriteria_id,
-                'nilai' => $data['kepadatan_penduduk'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
+        foreach ($kriteriaList as $kriteria) {
+            $nilai = match ($kriteria->kunci_observasi) {
+                'kepadatan_penduduk' => $data['kepadatan_penduduk'] ?? 0,
+                'biaya_sewa' => $data['harga_sewa'] ?? 0,
+                'jumlah_kompetitor' => $data['jumlah_kompetitor'] ?? 0,
+                'jarak_rph' => $data['jarak_rph'] ?? 0,
+                'aksesibilitas' => $aksesScore,
+                'kelayakan_bangunan' => $layakScore,
+                default => null,
+            };
 
-        if ($kriteriaList->has('C2')) {
-            $details[] = [
-                'penilaian_id' => $penilaian->penilaian_id,
-                'kriteria_id' => $kriteriaList['C2']->kriteria_id,
-                'nilai' => $data['harga_sewa'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        if ($kriteriaList->has('C3')) {
-            $details[] = [
-                'penilaian_id' => $penilaian->penilaian_id,
-                'kriteria_id' => $kriteriaList['C3']->kriteria_id,
-                'nilai' => $data['jumlah_kompetitor'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        if ($kriteriaList->has('C4')) {
-            $details[] = [
-                'penilaian_id' => $penilaian->penilaian_id,
-                'kriteria_id' => $kriteriaList['C4']->kriteria_id,
-                'nilai' => $data['jarak_rph'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        if ($kriteriaList->has('C5')) {
-            $details[] = [
-                'penilaian_id' => $penilaian->penilaian_id,
-                'kriteria_id' => $kriteriaList['C5']->kriteria_id,
-                'nilai' => $aksesScore,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        if ($kriteriaList->has('C6')) {
-            $details[] = [
-                'penilaian_id' => $penilaian->penilaian_id,
-                'kriteria_id' => $kriteriaList['C6']->kriteria_id,
-                'nilai' => $layakScore,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+            if ($nilai !== null) {
+                $details[] = [
+                    'penilaian_id' => $penilaian->penilaian_id,
+                    'kriteria_id' => $kriteria->kriteria_id,
+                    'nilai' => $nilai,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
         }
 
         if (!empty($details)) {

@@ -30,7 +30,7 @@
                       this.isLoadingBps = true;
                       this.bpsError = '';
                       try {
-                          let response = await fetch('/api/bps/kepadatan-by-lokasi/' + lokasiId);
+                          let response = await fetch('/api/wilayah/kepadatan-by-lokasi/' + lokasiId);
                           let result = await response.json();
                           if (result.success && result.data) {
                               document.getElementById('kepadatan_penduduk').value = result.data.kepadatan;
@@ -45,7 +45,8 @@
                           this.isLoadingBps = false;
                       }
                   }
-              }">
+              }"
+              x-init="fetchBpsData('{{ $lokasi->lokasi_id }}')">
             @csrf
 
             <!-- Section 1: Data Utama -->
@@ -56,15 +57,18 @@
                 </div>
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="lokasi_id" class="block text-sm font-medium text-base-dark mb-1">Pilih Lokasi (Alternatif)</label>
-                        <select id="lokasi_id" name="lokasi_id" required @change="fetchBpsData($event.target.value)" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm py-2 px-3 bg-white">
-                            <option value="">-- Pilih Lokasi --</option>
-                            @foreach($lokasis as $lokasi)
-                                <option value="{{ $lokasi->lokasi_id }}" {{ old('lokasi_id') == $lokasi->lokasi_id ? 'selected' : '' }}>
-                                    {{ $lokasi->nama_lokasi }} ({{ $lokasi->kecamatan }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <label class="block text-sm font-medium text-base-dark mb-1">Lokasi (Alternatif)</label>
+                        <input type="hidden" name="lokasi_id" value="{{ $lokasi->lokasi_id }}">
+                        <div class="bg-gray-50 p-4 rounded-md border border-gray-200 h-full shadow-inner">
+                            <div class="font-bold text-base-dark text-lg">{{ $lokasi->nama_lokasi }}</div>
+                            <div class="text-sm text-gray-600 mt-1 flex items-start">
+                                <svg class="w-4 h-4 mr-1 mt-0.5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <span>{{ $lokasi->alamat }}</span>
+                            </div>
+                            <div class="text-sm text-gray-500 mt-1 pl-5">
+                                {{ ucwords(strtolower($lokasi->kecamatan)) }}, {{ ucwords(strtolower($lokasi->kabupaten)) }}
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label for="tanggal_observasi" class="block text-sm font-medium text-base-dark mb-1">Tanggal Observasi</label>
@@ -85,15 +89,16 @@
                             <span>Kepadatan Penduduk</span>
                             <span x-show="isLoadingBps" class="text-xs text-primary flex items-center" x-cloak>
                                 <svg class="animate-spin -ml-1 mr-1 h-3 w-3 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                Mengambil Data...
+                                Mencari Data...
                             </span>
                         </label>
                         <div class="relative">
-                            <input id="kepadatan_penduduk" type="number" step="any" name="kepadatan_penduduk" value="{{ old('kepadatan_penduduk') }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm py-2 px-3" :class="{'bg-gray-100': isLoadingBps}" :readonly="isLoadingBps">
+                            <input id="kepadatan_penduduk" type="text" inputmode="decimal" name="kepadatan_penduduk" value="{{ old('kepadatan_penduduk') }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm py-2 px-3" :class="{'bg-gray-100': isLoadingBps}" :readonly="isLoadingBps">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 sm:text-sm">jiwa/km²</span>
                             </div>
                         </div>
+                        <p class="text-xs text-gray-400 mt-1">Gunakan titik atau koma untuk angka desimal</p>
                         <p x-show="bpsError" x-text="bpsError" class="text-xs text-red-500 mt-1" x-cloak></p>
                         <input type="hidden" id="tahun_bps" name="tahun_bps" value="{{ old('tahun_bps') }}">
                         <input type="hidden" id="kode_wilayah_bps" name="kode_wilayah_bps" value="{{ old('kode_wilayah_bps') }}">
@@ -119,11 +124,12 @@
                     <div>
                         <label for="jarak_rph" class="block text-sm font-medium text-base-dark mb-1">Jarak RPH</label>
                         <div class="relative">
-                            <input id="jarak_rph" type="number" step="any" name="jarak_rph" value="{{ old('jarak_rph') }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm py-2 px-3">
+                            <input id="jarak_rph" type="text" inputmode="decimal" name="jarak_rph" value="{{ old('jarak_rph') }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm py-2 px-3">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 sm:text-sm">km</span>
                             </div>
                         </div>
+                        <p class="text-xs text-gray-400 mt-1">Gunakan titik atau koma untuk angka desimal</p>
                     </div>
                 </div>
             </div>
@@ -191,11 +197,13 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-base-dark mb-1">Luas Tanah (m²)</label>
-                            <input type="number" step="any" name="luas_tanah" value="{{ old('luas_tanah') }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm py-2 px-3">
+                            <input type="text" inputmode="decimal" name="luas_tanah" value="{{ old('luas_tanah') }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm py-2 px-3">
+                            <p class="text-xs text-gray-400 mt-1">Gunakan titik atau koma untuk angka desimal</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-base-dark mb-1">Luas Bangunan (m²)</label>
-                            <input type="number" step="any" name="luas_bangunan" value="{{ old('luas_bangunan') }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm py-2 px-3">
+                            <input type="text" inputmode="decimal" name="luas_bangunan" value="{{ old('luas_bangunan') }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm py-2 px-3">
+                            <p class="text-xs text-gray-400 mt-1">Gunakan titik atau koma untuk angka desimal</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-base-dark mb-1">Jumlah Ruangan</label>

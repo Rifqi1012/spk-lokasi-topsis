@@ -22,12 +22,11 @@ class KriteriaController extends Controller
     {
         $search = $request->input('search');
 
-        $kriterias = Kriteria::query()
-            ->when($search, function ($query, $search) {
-                return $query->where('kode_kriteria', 'like', "%{$search}%")
-                    ->orWhere('nama_kriteria', 'like', "%{$search}%");
-            })
-            ->orderBy('kode_kriteria', 'asc')
+        $kriterias = Kriteria::when($search, function ($query, $search) {
+            return $query->where('nama_kriteria', 'like', "%{$search}%")
+                ->orWhere('kode_kriteria', 'like', "%{$search}%");
+        })
+            ->orderBy('urutan', 'asc')
             ->paginate(10)
             ->withQueryString();
 
@@ -36,17 +35,7 @@ class KriteriaController extends Controller
         return view('manajer.kriteria.index', compact('kriterias', 'search', 'totalBobot'));
     }
 
-    public function create()
-    {
-        $remainingBobot = $this->kriteriaService->getRemainingBobot();
-        return view('manajer.kriteria.create', compact('remainingBobot'));
-    }
-
-    public function store(StoreKriteriaRequest $request)
-    {
-        Kriteria::create($request->validated());
-        return redirect()->route('manajer.kriteria.index')->with('success', 'Kriteria berhasil ditambahkan.');
-    }
+    // create and store methods removed to lock schema
 
     public function edit(Kriteria $kriteria)
     {
@@ -58,11 +47,5 @@ class KriteriaController extends Controller
     {
         $kriteria->update($request->validated());
         return redirect()->route('manajer.kriteria.index')->with('success', 'Kriteria berhasil diperbarui.');
-    }
-
-    public function destroy(Kriteria $kriteria)
-    {
-        $kriteria->delete();
-        return redirect()->route('manajer.kriteria.index')->with('success', 'Kriteria berhasil dihapus.');
     }
 }

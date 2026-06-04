@@ -2,146 +2,169 @@
 
 namespace App\Services;
 
-use App\Models\Alternative;
-use App\Models\Criteria;
-use App\Models\TopsisCalculation;
-use App\Models\TopsisCalculationResult;
+use App\Models\Kriteria;
+use App\Models\Penilaian;
+use App\Models\HasilPerhitungan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class TopsisService
 {
     /**
-     * Executes the TOPSIS calculation process.
+     * Executes the TOPSIS calculation process and stores the results.
      * 
-     * @param string|null $description Optional description for this batch calculation
-     * @return TopsisCalculation The created calculation session with results
+     * @return array The calculation steps for display
      */
-    public function calculate(?string $description = null): TopsisCalculation
+    public function calculate(): array
     {
-        $criterias = Criteria::all();
-        $alternatives = Alternative::with('scores')->get();
+        $kriterias = Kriteria::orderBy('urutan')->get();
+        // ONLY get penilaians that have an active (non-deleted) lokasi
+        $penilaians = Penilaian::with(['lokasi', 'detailPenilaians'])
+            ->whereHas('lokasi', function ($query) {
+                $query->whereNull('deleted_at');
+            })
+            ->get();
 
-        if ($criterias->isEmpty() || $alternatives->isEmpty()) {
+        if ($kriterias->isEmpty() || $penilaians->isEmpty()) {
             throw new \Exception("Cannot calculate TOPSIS without criteria and alternatives.");
         }
 
-        // 1. Normalize Criteria Weights (so they sum to 1)
-        $totalWeight = $criterias->sum('weight');
+        // 1. Check Completeness and Integrity
+        $totalKriteria = $kriterias->count();
+        foreach ($penilaians as $penilaian) {
+            if ($penilaian->detailPenilaians->count() < $totalKriteria) {
+                throw new \Exception("Data matriks belum lengkap untuk lokasi: " . $penilaian->lokasi->nama_lokasi);
+            }
+            if ($penilaian->detailPenilaians->count() > $totalKriteria) {
+                throw new \Exception("Terdeteksi duplikasi data penilaian untuk lokasi: " . $penilaian->lokasi->nama_lokasi);
+            }
+        }
+
+        // 2. Normalize Criteria Weights (so they sum to 1)
+        $totalWeight = $kriterias->sum('bobot');
         if ($totalWeight == 0) {
-            throw new \Exception("Total criteria weight cannot be zero.");
+            throw new \Exception("Total bobot kriteria tidak boleh nol.");
         }
 
         $normalizedWeights = [];
-        foreach ($criterias as $criteria) {
-            $normalizedWeights[$criteria->id] = $criteria->weight / $totalWeight;
+        foreach ($kriterias as $criteria) {
+            $normalizedWeights[$criteria->kriteria_id] = $criteria->bobot / $totalWeight;
         }
 
-        // 2. Build Decision Matrix (x_ij)
+        // 3. Build Decision Matrix (x_ij)
         $matrix = [];
         $criteriaSums = []; // For denominator of normalized matrix
 
         // Initialize sums
-        foreach ($criterias as $criteria) {
-            $criteriaSums[$criteria->id] = 0;
+        foreach ($kriterias as $criteria) {
+            $criteriaSums[$criteria->kriteria_id] = 0;
         }
 
-        foreach ($alternatives as $alt) {
-            foreach ($criterias as $criteria) {
-                // Find score or default to 0
-                $scoreModel = $alt->scores->where('criteria_id', $criteria->id)->first();
-                $score = $scoreModel ? $scoreModel->score : 0;
+        foreach ($penilaians as $penilaian) {
+            foreach ($kriterias as $criteria) {
+                $detail = $penilaian->detailPenilaians->where('kriteria_id', $criteria->kriteria_id)->first();
+                if ($detail === null || $detail->nilai === null) {
+                    throw new \Exception("Nilai kriteria {$criteria->kode_kriteria} kosong atau tidak valid pada lokasi {$penilaian->lokasi->nama_lokasi}.");
+                }
+                $score = (float)$detail->nilai;
                 
-                $matrix[$alt->id][$criteria->id] = $score;
-                $criteriaSums[$criteria->id] += pow($score, 2);
+                $matrix[$penilaian->penilaian_id][$criteria->kriteria_id] = $score;
+                
+                $sq = pow($score, 2);
+                $criteriaSums[$criteria->kriteria_id] += $sq;
             }
         }
 
-        // 3. Normalize Decision Matrix & Weight it (v_ij)
+        // 4. Normalize Decision Matrix & Weight it (v_ij)
+        $normalizedMatrix = [];
         $weightedMatrix = [];
         $idealPositive = [];
         $idealNegative = [];
 
-        foreach ($criterias as $criteria) {
-            $idealPositive[$criteria->id] = $criteria->type === 'benefit' ? -INF : INF;
-            $idealNegative[$criteria->id] = $criteria->type === 'benefit' ? INF : -INF;
+        foreach ($kriterias as $criteria) {
+            $idealPositive[$criteria->kriteria_id] = strtolower($criteria->atribut) === 'benefit' ? -INF : INF;
+            $idealNegative[$criteria->kriteria_id] = strtolower($criteria->atribut) === 'benefit' ? INF : -INF;
         }
 
-        foreach ($alternatives as $alt) {
-            foreach ($criterias as $criteria) {
-                $score = $matrix[$alt->id][$criteria->id];
-                $denominator = sqrt($criteriaSums[$criteria->id]);
+        foreach ($penilaians as $penilaian) {
+            foreach ($kriterias as $criteria) {
+                $score = $matrix[$penilaian->penilaian_id][$criteria->kriteria_id];
+                $denominator = sqrt($criteriaSums[$criteria->kriteria_id]);
                 
                 // If all scores for a criteria are 0, prevent division by zero
-                $normalizedScore = $denominator > 0 ? ($score / $denominator) : 0;
-                $weightedScore = $normalizedScore * $normalizedWeights[$criteria->id];
+                $normalizedScore = $denominator > 0 ? round($score / $denominator, 6) : 0;
+                $normalizedMatrix[$penilaian->penilaian_id][$criteria->kriteria_id] = $normalizedScore;
                 
-                $weightedMatrix[$alt->id][$criteria->id] = $weightedScore;
+                $weightedScore = round($normalizedScore * $normalizedWeights[$criteria->kriteria_id], 6);
+                $weightedMatrix[$penilaian->penilaian_id][$criteria->kriteria_id] = $weightedScore;
 
                 // Determine Ideals
-                if ($criteria->type === 'benefit') {
-                    if ($weightedScore > $idealPositive[$criteria->id]) $idealPositive[$criteria->id] = $weightedScore;
-                    if ($weightedScore < $idealNegative[$criteria->id]) $idealNegative[$criteria->id] = $weightedScore;
+                if (strtolower($criteria->atribut) === 'benefit') {
+                    if ($weightedScore > $idealPositive[$criteria->kriteria_id]) $idealPositive[$criteria->kriteria_id] = $weightedScore;
+                    if ($weightedScore < $idealNegative[$criteria->kriteria_id]) $idealNegative[$criteria->kriteria_id] = $weightedScore;
                 } else { // cost
-                    if ($weightedScore < $idealPositive[$criteria->id]) $idealPositive[$criteria->id] = $weightedScore;
-                    if ($weightedScore > $idealNegative[$criteria->id]) $idealNegative[$criteria->id] = $weightedScore;
+                    if ($weightedScore < $idealPositive[$criteria->kriteria_id]) $idealPositive[$criteria->kriteria_id] = $weightedScore;
+                    if ($weightedScore > $idealNegative[$criteria->kriteria_id]) $idealNegative[$criteria->kriteria_id] = $weightedScore;
                 }
             }
         }
 
-        // 4. Calculate Distances and Preference Scores
+        // 5. Calculate Distances and Preference Scores
         $results = [];
-        foreach ($alternatives as $alt) {
+        foreach ($penilaians as $penilaian) {
             $distancePositive = 0;
             $distanceNegative = 0;
 
-            foreach ($criterias as $criteria) {
-                $val = $weightedMatrix[$alt->id][$criteria->id];
-                $distancePositive += pow($val - $idealPositive[$criteria->id], 2);
-                $distanceNegative += pow($val - $idealNegative[$criteria->id], 2);
+            foreach ($kriterias as $criteria) {
+                $val = $weightedMatrix[$penilaian->penilaian_id][$criteria->kriteria_id];
+                $distancePositive += pow($val - $idealPositive[$criteria->kriteria_id], 2);
+                $distanceNegative += pow($val - $idealNegative[$criteria->kriteria_id], 2);
             }
 
-            $dPlus = sqrt($distancePositive);
-            $dMinus = sqrt($distanceNegative);
+            $dPlus = round(sqrt($distancePositive), 6);
+            $dMinus = round(sqrt($distanceNegative), 6);
 
-            // C_i^*
-            $preferenceScore = ($dPlus + $dMinus) > 0 ? ($dMinus / ($dPlus + $dMinus)) : 0;
+            // V_i (Preference Score)
+            $preferenceScore = ($dPlus + $dMinus) > 0 ? round($dMinus / ($dPlus + $dMinus), 6) : 0;
 
             $results[] = [
-                'alternative_id' => $alt->id,
+                'penilaian_id' => $penilaian->penilaian_id,
+                'nama_lokasi' => $penilaian->lokasi->nama_lokasi,
                 'preference_score' => $preferenceScore,
-                // Snapshot of scores for historical record
-                'snapshot_data' => [
-                    'scores' => $matrix[$alt->id],
-                    'weights' => $normalizedWeights,
-                    'ideals' => ['positive' => $idealPositive, 'negative' => $idealNegative],
-                    'weighted_scores' => $weightedMatrix[$alt->id]
-                ]
+                'd_plus' => $dPlus,
+                'd_minus' => $dMinus,
             ];
         }
 
         // Sort by preference score descending to rank
         usort($results, fn($a, $b) => $b['preference_score'] <=> $a['preference_score']);
 
-        // Persist to database inside a transaction
-        return DB::transaction(function () use ($description, $results) {
-            $calculation = TopsisCalculation::create([
-                'uuid' => (string) Str::uuid(),
-                'description' => $description ?? 'TOPSIS Calculation ' . now()->format('Y-m-d H:i:s'),
-                'batch_date' => now(),
-            ]);
+        // Truncate causes an implicit commit in MySQL, so do it outside the transaction.
+        HasilPerhitungan::truncate();
 
+        // 6. Persist to database inside a transaction
+        DB::transaction(function () use (&$results) {
             $rank = 1;
-            foreach ($results as $res) {
-                $calculation->results()->create([
-                    'alternative_id' => $res['alternative_id'],
-                    'preference_score' => $res['preference_score'],
-                    'rank' => $rank++,
-                    'snapshot_data' => $res['snapshot_data'],
+            foreach ($results as &$res) {
+                HasilPerhitungan::create([
+                    'penilaian_id' => $res['penilaian_id'],
+                    'nilai_preferensi' => $res['preference_score'],
+                    'ranking' => $rank,
+                    'tanggal_hitung' => now(),
                 ]);
+                $res['ranking'] = $rank;
+                $rank++;
             }
-
-            return $calculation;
         });
+
+        // Return steps for view display
+        return [
+            'kriterias' => $kriterias,
+            'matrix' => $matrix,
+            'normalizedMatrix' => $normalizedMatrix,
+            'weightedMatrix' => $weightedMatrix,
+            'idealPositive' => $idealPositive,
+            'idealNegative' => $idealNegative,
+            'results' => $results
+        ];
     }
 }

@@ -11,6 +11,23 @@ class StoreObservasiRequest extends FormRequest
         return $this->user()->can('manage observasi');
     }
 
+    protected function prepareForValidation()
+    {
+        $fieldsToNormalize = ['luas_tanah', 'luas_bangunan', 'harga_sewa', 'kepadatan_penduduk', 'jarak_rph'];
+        
+        $normalizedData = [];
+        foreach ($fieldsToNormalize as $field) {
+            if ($this->has($field)) {
+                // Replace comma with dot for decimal values
+                $normalizedData[$field] = str_replace(',', '.', $this->input($field));
+            }
+        }
+        
+        if (!empty($normalizedData)) {
+            $this->merge($normalizedData);
+        }
+    }
+
     public function rules(): array
     {
         return [

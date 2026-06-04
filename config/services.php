@@ -35,9 +35,4 @@ return [
         ],
     ],
 
-    'bps' => [
-        'app_id' => env('BPS_APP_ID'),
-        'var_kepadatan' => env('BPS_VAR_KEPADATAN', 142),
-    ],
-
 ];

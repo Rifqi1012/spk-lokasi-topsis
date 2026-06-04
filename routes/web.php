@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WilayahController;
+use App\Http\Controllers\Manajer\DashboardController as ManajerDashboardController;
+use App\Http\Controllers\Manajer\HasilController as ManajerHasilController;
+use App\Http\Controllers\Direktur\DashboardController as DirekturDashboardController;
+use App\Http\Controllers\Direktur\RekomendasiController as DirekturRekomendasiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,32 +24,42 @@ Route::get('/dashboard', function (Request $request) {
 
 // Manajer Routes
 Route::middleware(['auth', 'verified', 'role:manajer'])->prefix('manajer')->name('manajer.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard', ['role' => 'Manajer']);
-    })->name('dashboard');
+    Route::get('/dashboard', [ManajerDashboardController::class, 'index'])->name('dashboard');
 
     // Users CRUD
     Route::resource('users', \App\Http\Controllers\Manajer\UserController::class);
-    // Kriteria CRUD
-    Route::resource('kriteria', \App\Http\Controllers\Manajer\KriteriaController::class)->parameters([
+    // Kriteria Routes (Restricted: no create, store, or destroy)
+    Route::resource('kriteria', \App\Http\Controllers\Manajer\KriteriaController::class)->only(['index', 'edit', 'update'])->parameters([
         'kriteria' => 'kriteria' // prevent laravel from guessing 'kriterium'
     ]);
     // Lokasi CRUD
     Route::resource('lokasi', \App\Http\Controllers\Manajer\LokasiController::class);
     // Observasi CRUD
-    Route::resource('observasi', \App\Http\Controllers\Manajer\ObservasiController::class)->except(['edit', 'update']);
-    Route::get('/penilaian', function() { return 'Manage Penilaian'; })->name('penilaian.index')->middleware('permission:manage penilaian');
-    Route::get('/perhitungan', function() { return 'Process Perhitungan'; })->name('perhitungan.index')->middleware('permission:process perhitungan');
-    Route::get('/hasil', function() { return 'View Hasil'; })->name('hasil.index')->middleware('permission:view hasil');
+    Route::get('observasi/create/{lokasi}', [\App\Http\Controllers\Manajer\ObservasiController::class, 'create'])->name('observasi.create');
+    Route::resource('observasi', \App\Http\Controllers\Manajer\ObservasiController::class)->except(['create', 'edit', 'update']);
+    // Penilaian & Perhitungan TOPSIS
+    Route::get('/penilaian', [\App\Http\Controllers\Manajer\PenilaianController::class, 'index'])->name('penilaian.index')->middleware('permission:manage penilaian');
+    Route::get('/perhitungan', [\App\Http\Controllers\Manajer\PerhitunganController::class, 'index'])->name('perhitungan.index')->middleware('permission:process perhitungan');
+    Route::post('/perhitungan/calculate', [\App\Http\Controllers\Manajer\PerhitunganController::class, 'calculate'])->name('perhitungan.calculate')->middleware('permission:process perhitungan');
+    Route::get('/perhitungan/export/excel', [\App\Http\Controllers\Manajer\PerhitunganController::class, 'exportExcel'])->name('perhitungan.export.excel')->middleware('permission:process perhitungan');
+
+    // Hasil Keputusan (Final Business Decision)
+    Route::get('/hasil', [ManajerHasilController::class, 'index'])->name('hasil.index')->middleware('permission:view hasil');
+    Route::get('/hasil/export/pdf', [ManajerHasilController::class, 'exportPdf'])->name('hasil.export.pdf')->middleware('permission:view hasil');
 });
 
 // Direktur Routes
 Route::middleware(['auth', 'verified', 'role:direktur'])->prefix('direktur')->name('direktur.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard', ['role' => 'Direktur']);
-    })->name('dashboard')->middleware('permission:view dashboard');
+    Route::get('/dashboard', [DirekturDashboardController::class, 'index'])
+        ->name('dashboard')
+        ->middleware('permission:view dashboard');
 
-    Route::get('/rekomendasi', function() { return 'View Rekomendasi'; })->name('rekomendasi.index')->middleware('permission:view rekomendasi');
+    Route::prefix('rekomendasi')->name('rekomendasi.')->middleware('permission:view rekomendasi')->group(function() {
+        Route::get('/', [DirekturRekomendasiController::class, 'index'])->name('index');
+        Route::get('/export/pdf', [DirekturRekomendasiController::class, 'exportPdf'])->name('export.pdf');
+        Route::get('/export/excel', [DirekturRekomendasiController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/{id}', [DirekturRekomendasiController::class, 'show'])->name('show');
+    });
 });
 
 Route::middleware('auth')->group(function () {
@@ -58,11 +72,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/provinces', [WilayahController::class, 'provinces']);
         Route::get('/regencies/{province_id}', [WilayahController::class, 'regencies']);
         Route::get('/districts/{regency_id}', [WilayahController::class, 'districts']);
-    });
-
-    // BPS API Routes
-    Route::prefix('api/bps')->group(function () {
-        Route::get('/kepadatan-by-lokasi/{lokasi_id}', [\App\Http\Controllers\Api\BPSController::class, 'getKepadatanByLokasi']);
+        Route::get('/kepadatan-by-lokasi/{lokasi_id}', [WilayahController::class, 'getKepadatanByLokasi']);
     });
 });
 

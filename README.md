@@ -1,58 +1,257 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
+  <br>
+  <h1>Sistem Pendukung Keputusan Penentuan Lokasi Cabang Baru Saung Aqiqah Menggunakan Metode TOPSIS</h1>
+  <p>
+    <b>A Modern, Semi-Dynamic Decision Support System built with Laravel 13 & Tailwind CSS</b>
+  </p>
+  
+  [![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+  [![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+  [![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+  [![Status](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)](#)
+</div>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+## 🎨 Project Preview
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+<div align="center">
+  <img src="https://via.placeholder.com/800x400/1a202c/ffffff?text=Login+Page+Screenshot" alt="Login Page">
+  <p><em>Autentikasi Aman & Bersih</em></p>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+  <img src="https://via.placeholder.com/800x400/1a202c/ffffff?text=Dashboard+Screenshot" alt="Dashboard">
+  <p><em>Dashboard Analitik Interaktif</em></p>
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+  <img src="https://via.placeholder.com/800x400/1a202c/ffffff?text=TOPSIS+Calculation+Screenshot" alt="TOPSIS Calculation">
+  <p><em>Transparansi Perhitungan Matematis TOPSIS</em></p>
 
-## Learning Laravel
+  <img src="https://via.placeholder.com/800x400/1a202c/ffffff?text=Recommendation+Result+Screenshot" alt="Recommendation Result">
+  <p><em>Hasil Perankingan Rekomendasi Lokasi</em></p>
+</div>
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ✨ Features
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- 🔐 **Authentication & Role Management**: Sistem akses aman berbasis role untuk keamanan data.
+- 👥 **Manajemen User**: Pengelolaan akun Manajer dan Direktur dengan hak akses yang berbeda.
+- ⚙️ **Manajemen Kriteria (Semi-Dynamic)**: Kustomisasi bobot dan urutan kriteria tanpa merusak arsitektur perhitungan dasar.
+- 📍 **Manajemen Lokasi Alternatif**: Pendataan kandidat lokasi cabang baru yang terstruktur.
+- 📝 **Observasi Lokasi**: Formulir digital terintegrasi untuk mencatat hasil tinjauan lapangan.
+- 📊 **Penilaian Matriks Keputusan**: Pembentukan matriks awal TOPSIS secara otomatis dari hasil observasi.
+- 🧮 **Perhitungan TOPSIS Transparan**: Menampilkan langkah demi langkah matematis (Normalisasi hingga Nilai Preferensi).
+- 🏆 **Hasil Rekomendasi Lokasi**: Peringkat lokasi terbaik yang siap dipresentasikan.
+- 🗺️ **Dataset Kepadatan Penduduk**: Integrasi data kepadatan penduduk level wilayah (Provinsi, Kabupaten, Kecamatan) berbasis database lokal.
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## 📐 TOPSIS Methodology
 
+Metode *Technique for Order of Preference by Similarity to Ideal Solution* (TOPSIS) mengedepankan logika matematis untuk pengambilan keputusan multi-kriteria:
+
+1. **Matriks Keputusan ($X_{ij}$)**: Matriks awal berdasarkan data observasi.
+2. **Normalisasi ($R_{ij}$)**: Menyamakan skala semua kriteria.
+3. **Normalisasi Terbobot ($Y_{ij}$)**: Mengalikan matriks normalisasi dengan bobot masing-masing kriteria.
+4. **Solusi Ideal ($A^+ / A^-$)**: Menentukan nilai terbaik (Positif) dan terburuk (Negatif) untuk setiap kriteria berdasarkan jenisnya (*Benefit/Cost*).
+5. **Jarak Solusi ($D^+ / D^-$)**: Menghitung jarak geometris setiap alternatif terhadap Solusi Ideal Positif dan Negatif.
+6. **Nilai Preferensi ($V_i$)**: Kalkulasi nilai akhir. Nilai terbesar adalah lokasi yang paling direkomendasikan.
+
+---
+
+## 🏗 System Architecture
+
+Sistem ini dibangun dengan **Monolithic Architecture** yang modern. Antarmuka sisi klien didorong oleh Blade Template, Alpine.js, dan Tailwind CSS, sedangkan logika komputasi ditangani seutuhnya oleh PHP & Laravel.
+
+### Arsitektur Kriteria Semi-Dinamis
+Konsep Semi-Dinamis dirancang secara spesifik untuk kasus tesis ini:
+- **Konfigurasi Kriteria Bersifat Dinamis**: Administrator dapat merubah nama tampilan, atribut (*Benefit/Cost*), bobot kriteria, dan urutan (*display order*).
+- **Entitas Observasi Bersifat Tetap (Fixed)**: Field operasional observasi tidak berubah secara serampangan untuk menjamin validitas metodologi pengukuran matematis.
+
+### Hubungan Entitas Core
+`Lokasi` ➔ `Observasi` ➔ `Penilaian` ➔ `Detail Penilaian` ➔ `Hasil Perhitungan`
+
+---
+
+## 🗄 Database Design
+
+Desain skema basis data inti (RDBMS):
+
+| Tabel | Deskripsi |
+| --- | --- |
+| `users` | Autentikasi dan identitas pengguna aplikasi. |
+| `kriteria` | Parameter pendukung keputusan (bobot, atribut, kunci_observasi, urutan). |
+| `lokasi` | Entitas alternatif wilayah atau alamat kandidat cabang. |
+| `observasi_lokasi` | Pencatatan data mentah survei fisik ke sebuah `lokasi`. |
+| `penilaian` | Tabel induk untuk menginisiasi proses penilaian. |
+| `detail_penilaian` | Tabel matriks (pivot) yang menyimpan skor untuk tiap relasi kriteria dan penilaian. |
+| `hasil_perhitungan` | Menyimpan log nilai preferensi akhir dan peringkat (*ranking*). |
+
+---
+
+## 🚀 Installation Guide
+
+Ikuti panduan berikut untuk menjalankan sistem secara lokal:
+
+### Requirements
+- **PHP** `^8.3`
+- **Composer**
+- **Node.js** & **NPM**
+- **MySQL**
+
+### Step-by-step
 ```bash
-composer require laravel/boost --dev
+# 1. Clone repository
+git clone https://github.com/yourusername/saung-aqiqah-topsis.git
+cd saung-aqiqah-topsis
 
-php artisan boost:install
+# 2. Install PHP Dependencies
+composer install
+
+# 3. Install Node.js Dependencies
+npm install
+
+# 4. Environment Setup
+cp .env.example .env
+php artisan key:generate
+
+# 5. Konfigurasi Database
+# Buka file .env dan sesuaikan kredensial MySQL Anda:
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=nama_database_anda
+# DB_USERNAME=root
+# DB_PASSWORD=
+
+# 6. Jalankan Migrasi & Seeder Utama (termasuk Role & Kriteria)
+php artisan migrate:fresh --seed
+
+# 7. Import Dataset Wilayah & Kepadatan Penduduk BPS
+php artisan import:wilayah
+
+# 8. Build Frontend Assets
+npm run build
+
+# 9. Jalankan Development Server
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## 🧪 Seeder & Dummy Data
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Untuk memvalidasi dan membandingkan hasil perhitungan web dengan dokumen Excel tesis, sistem menyediakan Seeder yang dirancang secara presisi menggunakan *dataset* nyata pengujian.
 
-## Code of Conduct
+Dataset *Dummy* ini berisi konfigurasi matriks A1 hingga A7:
+- `Kp Sarampad`
+- `Jl. Perumahan Puncak Manis`
+- `Jl Sabandar`
+- `Jl. Griya Maleber Indah`
+- `Jl. Bumi Emas`
+- `Jl Raya Cibeber, Kp Cilaku Kaum`
+- `Ciputri`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Cara Menjalankan Seeder TOPSIS:**
+```bash
+php artisan import:dummy
+```
+Perintah ini mengeksekusi `DummyTopsisSeeder` yang secara otomatis membuatkan entitas Lokasi, Observasi, Matriks Keputusan, serta Detail Penilaian secara terstruktur tanpa merusak data inti.
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🔑 Login Credentials
 
-## License
+Setelah menjalankan *seeding* bawaan, Anda dapat login dengan akun berikut:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Manajer (Administrator Operasional)
+- **Email:** `manajer@example.com`
+- **Password:** `password`
+
+### Direktur (Pimpinan Pengambil Keputusan)
+- **Email:** `direktur@example.com`
+- **Password:** `password`
+
+---
+
+## 📁 Project Structure
+
+Direktori penting di dalam aplikasi ini:
+
+<details>
+<summary><b>Klik untuk melihat struktur</b></summary>
+
+- `app/` : Menyimpan logika inti (*Controllers, Models, Services, Requests*). Di sini tempat *Engine* `TopsisService.php` bersemayam.
+- `resources/views/` : Kumpulan antarmuka UI dengan arsitektur Blade & Tailwind CSS.
+- `database/` : File migrasi struktur tabel, seeder *dummy*, dan *factories*.
+- `routes/` : Deklarasi rute `web.php` untuk autentikasi, akses manajer, dan direktur.
+- `public/` : Penyimpanan berkas *assets* yang di-_build_ serta aset publik lainnya.
+</details>
+
+---
+
+## 🔄 TOPSIS Flow Explanation
+
+Alur kerja aplikasi dirancang sangat intuitif:
+
+1. **Input Lokasi:** Manajer mendata alternatif lokasi wilayah cabang baru.
+2. **Observasi:** Manajer turun ke lapangan dan mengisi form kelayakan, kepadatan penduduk, serta jarak RPH ke dalam sistem.
+3. **Generate Matriks:** Sistem otomatis menerjemahkan data mentah observasi menjadi nilai angka matriks X.
+4. **Hitung TOPSIS:** Dengan satu klik, layanan `TopsisService` mengolah matriks secara matematis secara *real-time*.
+5. **Ranking Hasil:** Direktur dan Manajer melihat peringkat V (Nilai Preferensi) tertinggi untuk membuat keputusan akhir.
+
+---
+
+## 🖼️ Screenshots
+
+<div align="center">
+  <table width="100%">
+    <tr>
+      <td width="50%" align="center">
+        <img src="https://via.placeholder.com/600x350/1a202c/ffffff?text=Penilaian+Matrix" alt="Matrix Preview">
+        <br><i>Tabel Penilaian Awal</i>
+      </td>
+      <td width="50%" align="center">
+        <img src="https://via.placeholder.com/600x350/1a202c/ffffff?text=Kriteria+Management" alt="Kriteria Preview">
+        <br><i>Manajemen Kriteria (Semi-Dinamis)</i>
+      </td>
+    </tr>
+    <tr>
+      <td width="50%" align="center">
+        <img src="https://via.placeholder.com/600x350/1a202c/ffffff?text=Observasi+Form" alt="Observasi Form">
+        <br><i>Formulir Observasi Interaktif</i>
+      </td>
+      <td width="50%" align="center">
+        <img src="https://via.placeholder.com/600x350/1a202c/ffffff?text=Laporan+Cetak" alt="Laporan Preview">
+        <br><i>Tampilan Laporan & Ranking</i>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
+
+## 🚀 Future Development
+
+Beberapa ide pengembangan di masa depan untuk meningkatkan skalabilitas dan fungsionalitas sistem:
+- 🗺️ **Google Maps Integration**: Memasukkan _coordinate selector_ terpadu untuk pencatatan titik lokasi.
+- 🌍 **GIS Support**: Visualisasi peta *Heatmap* untuk distribusi kepadatan penduduk dan persebaran kompetitor.
+- 📈 **Multi-Branch Analytics**: Dasbor analitik tingkat lanjut untuk perbandingan pendapatan antar cabang.
+- 📑 **Export PDF / Excel**: Modul pengunduhan hasil perankingan SPK sebagai dokumen laporan cetak resmi.
+- 📊 **Data Visualization**: Grafik interaktif (misal: *Radar Chart*) untuk perbandingan komparatif lokasi A vs B.
+
+---
+
+## 📝 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <b>Dikembangkan untuk Keperluan Skripsi / Tugas Akhir</b><br>
+  Dibuat dengan ❤️ oleh [Nama Anda]<br>
+  © 2026 Universitas [Nama Kampus]<br>
+  <i>Dokumentasi ini dibuat untuk merepresentasikan standar pengembangan perangkat lunak modern.</i>
+</div>

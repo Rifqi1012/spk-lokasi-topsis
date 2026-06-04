@@ -10,10 +10,13 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-base-light text-base-dark h-screen overflow-hidden flex">
+    <body class="font-sans antialiased bg-base-light text-base-dark h-screen overflow-hidden flex" x-data="{ sidebarOpen: false }">
         
+        <!-- Mobile Sidebar Overlay -->
+        <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 bg-gray-900 bg-opacity-50 z-20 md:hidden" @click="sidebarOpen = false" style="display: none;"></div>
+
         <!-- Sidebar -->
-        <aside class="w-64 bg-base-white border-r border-gray-200 flex flex-col hidden md:flex h-full shadow-sm z-20">
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed md:static inset-y-0 left-0 w-64 bg-base-white border-r border-gray-200 flex flex-col h-full shadow-sm z-30 transition-transform duration-300 md:translate-x-0">
             <!-- Logo -->
             <div class="h-16 flex items-center px-6 border-b border-gray-100">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
@@ -58,20 +61,26 @@
                 @endcan
 
                 @can('manage penilaian')
-                <x-sidebar-link href="#" :active="request()->routeIs('manajer.penilaian.*')" icon="star">
+                <x-sidebar-link :href="route('manajer.penilaian.index')" :active="request()->routeIs('manajer.penilaian.*')" icon="star">
                     Penilaian
                 </x-sidebar-link>
                 @endcan
 
                 @can('process perhitungan')
-                <x-sidebar-link href="#" :active="request()->routeIs('manajer.topsis.*')" icon="calculator">
+                <x-sidebar-link :href="route('manajer.perhitungan.index')" :active="request()->routeIs('manajer.perhitungan.*')" icon="calculator">
                     Perhitungan TOPSIS
                 </x-sidebar-link>
                 @endcan
 
-                @can('view rekomendasi')
-                <x-sidebar-link href="#" :active="request()->routeIs('hasil.*')" icon="chart-bar">
+                @can('view hasil')
+                <x-sidebar-link :href="route('manajer.hasil.index')" :active="request()->routeIs('manajer.hasil.*')" icon="chart-bar">
                     Hasil Keputusan
+                </x-sidebar-link>
+                @endcan
+
+                @can('view rekomendasi')
+                <x-sidebar-link :href="route('direktur.rekomendasi.index')" :active="request()->routeIs('direktur.rekomendasi.*')" icon="chart-bar">
+                    Hasil Rekomendasi
                 </x-sidebar-link>
                 @endcan
             </div>
@@ -112,8 +121,8 @@
                 <div class="flex items-center">
                     <span class="text-lg font-bold text-base-dark">Saung Aqiqah</span>
                 </div>
-                <!-- Mobile menu toggle placeholder -->
-                <button class="text-gray-500 hover:text-primary focus:outline-none">
+                <!-- Mobile menu toggle button -->
+                <button @click="sidebarOpen = true" class="text-gray-500 hover:text-primary focus:outline-none p-2 rounded-md hover:bg-gray-100 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
             </header>

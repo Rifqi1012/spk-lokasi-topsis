@@ -22,9 +22,17 @@
                         <!-- Kode Kriteria -->
                         <div>
                             <label for="kode_kriteria" class="block text-sm font-medium text-base-dark mb-1">Kode Kriteria</label>
-                            <input id="kode_kriteria" type="text" name="kode_kriteria" value="{{ old('kode_kriteria', $kriteria->kode_kriteria) }}" readonly class="w-full rounded-md border-gray-300 shadow-sm bg-gray-50 text-gray-500 sm:text-sm py-2 px-3 cursor-not-allowed">
-                            <p class="text-xs text-gray-400 mt-1">Kode kriteria tidak disarankan untuk diubah karena terkait dengan perhitungan.</p>
+                            <input id="kode_kriteria" type="text" name="kode_kriteria" value="{{ old('kode_kriteria', $kriteria->kode_kriteria) }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm py-2 px-3 bg-gray-100" readonly>
+                            <p class="text-xs text-gray-400 mt-1">Kode kriteria (seperti C1, C2) kini dikunci dan tidak mempengaruhi urutan tabel matriks lagi.</p>
                             <x-input-error :messages="$errors->get('kode_kriteria')" class="mt-2" />
+                        </div>
+
+                        <!-- Urutan Kriteria -->
+                        <div>
+                            <label for="urutan" class="block text-sm font-medium text-base-dark mb-1">Urutan Tabel Matriks</label>
+                            <input id="urutan" type="number" name="urutan" value="{{ old('urutan', $kriteria->urutan) }}" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm py-2 px-3">
+                            <p class="text-xs text-gray-400 mt-1">Tentukan urutan kriteria ini saat ditampilkan di tabel matriks keputusan (1-6). Angka harus unik.</p>
+                            <x-input-error :messages="$errors->get('urutan')" class="mt-2" />
                         </div>
 
                         <!-- Nama Kriteria -->
@@ -44,14 +52,21 @@
                             <x-input-error :messages="$errors->get('atribut')" class="mt-2" />
                         </div>
 
-                        <!-- Jenis Input -->
+                        <!-- Jenis Input (Locked) -->
                         <div>
-                            <label for="jenis_input" class="block text-sm font-medium text-base-dark mb-1">Jenis Input Nilai</label>
-                            <select id="jenis_input" name="jenis_input" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm transition-colors py-2 px-3 bg-white">
-                                <option value="numeric" {{ old('jenis_input', $kriteria->jenis_input) == 'numeric' ? 'selected' : '' }}>Numeric (Angka Asli - misal: Rp. 10.000.000)</option>
-                                <option value="scoring" {{ old('jenis_input', $kriteria->jenis_input) == 'scoring' ? 'selected' : '' }}>Scoring (Sistem Poin - misal: 1 s/d 5)</option>
+                            <label for="jenis_input" class="block text-sm font-medium text-base-dark mb-1">Jenis Input Nilai <span class="text-xs font-normal text-gray-400">(Dikunci)</span></label>
+                            <select id="jenis_input" name="jenis_input" disabled class="w-full rounded-md border-gray-300 shadow-sm bg-gray-50 text-gray-500 sm:text-sm py-2 px-3 cursor-not-allowed">
+                                <option value="numeric" {{ old('jenis_input', $kriteria->jenis_input) == 'numeric' ? 'selected' : '' }}>Numeric</option>
+                                <option value="scoring" {{ old('jenis_input', $kriteria->jenis_input) == 'scoring' ? 'selected' : '' }}>Scoring</option>
                             </select>
-                            <x-input-error :messages="$errors->get('jenis_input')" class="mt-2" />
+                            <input type="hidden" name="jenis_input" value="{{ $kriteria->jenis_input }}">
+                        </div>
+
+                        <!-- Kunci Observasi (Locked) -->
+                        <div>
+                            <label for="kunci_observasi" class="block text-sm font-medium text-base-dark mb-1">Mapping Data Observasi <span class="text-xs font-normal text-gray-400">(Dikunci)</span></label>
+                            <input id="kunci_observasi" type="text" value="{{ $kriteria->kunci_observasi }}" disabled class="w-full rounded-md border-gray-300 shadow-sm bg-gray-50 text-gray-500 sm:text-sm py-2 px-3 cursor-not-allowed">
+                            <p class="text-xs text-gray-400 mt-1">Data tetap terikat pada field <strong>{{ $kriteria->kunci_observasi }}</strong> meskipun nama atau kode kriteria diubah.</p>
                         </div>
 
                         <!-- Bobot -->

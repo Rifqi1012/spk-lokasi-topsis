@@ -13,48 +13,56 @@ class KriteriaSeeder extends Seeder
             [
                 'kode_kriteria' => 'C1',
                 'nama_kriteria' => 'Kepadatan Penduduk',
-                'bobot' => 25.00,
+                'bobot' => 23.00,
                 'atribut' => 'benefit',
                 'jenis_input' => 'numeric',
+                'kunci_observasi' => 'kepadatan_penduduk',
             ],
             [
                 'kode_kriteria' => 'C2',
-                'nama_kriteria' => 'Biaya Sewa',
+                'nama_kriteria' => 'Aksesibilitas',
                 'bobot' => 20.00,
-                'atribut' => 'cost',
-                'jenis_input' => 'numeric',
+                'atribut' => 'benefit',
+                'jenis_input' => 'scoring',
+                'kunci_observasi' => 'aksesibilitas',
             ],
             [
                 'kode_kriteria' => 'C3',
-                'nama_kriteria' => 'Jumlah Kompetitor',
-                'bobot' => 15.00,
+                'nama_kriteria' => 'Biaya Sewa',
+                'bobot' => 14.00,
                 'atribut' => 'cost',
                 'jenis_input' => 'numeric',
+                'kunci_observasi' => 'biaya_sewa',
             ],
             [
                 'kode_kriteria' => 'C4',
-                'nama_kriteria' => 'Jarak dengan RPH',
+                'nama_kriteria' => 'Tingkat Pesaing',
                 'bobot' => 15.00,
                 'atribut' => 'cost',
                 'jenis_input' => 'numeric',
+                'kunci_observasi' => 'jumlah_kompetitor',
             ],
             [
                 'kode_kriteria' => 'C5',
-                'nama_kriteria' => 'Aksesibilitas',
-                'bobot' => 15.00,
-                'atribut' => 'benefit',
-                'jenis_input' => 'scoring',
+                'nama_kriteria' => 'Jarak Dengan RPH',
+                'bobot' => 14.00,
+                'atribut' => 'cost',
+                'jenis_input' => 'numeric',
+                'kunci_observasi' => 'jarak_rph',
             ],
             [
                 'kode_kriteria' => 'C6',
                 'nama_kriteria' => 'Kelayakan Bangunan',
-                'bobot' => 10.00,
+                'bobot' => 14.00,
                 'atribut' => 'benefit',
                 'jenis_input' => 'scoring',
+                'kunci_observasi' => 'kelayakan_bangunan',
             ]
         ];
 
+        $urutan = 1;
         foreach ($kriterias as $kriteria) {
+            $kriteria['urutan'] = $urutan++;
             Kriteria::create($kriteria);
         }
     }

@@ -19,6 +19,8 @@ class Kriteria extends Model
         'bobot',
         'atribut',
         'jenis_input',
+        'kunci_observasi',
+        'urutan',
     ];
 
     public function detailPenilaians(): HasMany

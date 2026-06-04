@@ -20,26 +20,27 @@ class ObservasiController extends Controller
     {
         $search = $request->input('search');
 
-        $observasis = ObservasiLokasi::query()
-            ->with(['lokasi', 'user'])
+        $lokasis = Lokasi::query()
+            ->with(['observasiLokasis.user'])
             ->when($search, function ($query, $search) {
-                return $query->whereHas('lokasi', function($q) use ($search) {
-                    $q->where('nama_lokasi', 'like', "%{$search}%");
-                });
+                return $query->where('nama_lokasi', 'like', "%{$search}%");
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->withQueryString();
 
-        return view('manajer.observasi.index', compact('observasis', 'search'));
+        return view('manajer.observasi.index', compact('lokasis', 'search'));
     }
 
-    public function create()
+    public function create(Lokasi $lokasi)
     {
-        // Get list of Lokasi that haven't been observed yet (optional: or all lokasi)
-        // We'll get all locations just in case they want multiple observations for the same location
-        $lokasis = Lokasi::orderBy('nama_lokasi')->get();
-        return view('manajer.observasi.create', compact('lokasis'));
+        // Prevent duplicate observation
+        if ($lokasi->observasiLokasis()->exists()) {
+            return redirect()->route('manajer.observasi.index')
+                ->with('error', 'Lokasi ini sudah memiliki data observasi.');
+        }
+
+        return view('manajer.observasi.create', compact('lokasi'));
     }
 
     public function store(StoreObservasiRequest $request)

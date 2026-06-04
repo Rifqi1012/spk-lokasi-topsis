@@ -1,13 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-base-dark leading-tight">
-                {{ __('Manajemen Kriteria') }}
-            </h2>
-            <a href="{{ route('manajer.kriteria.create') }}" class="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md font-medium text-sm text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors shadow-sm">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Tambah Kriteria
-            </a>
+            <div>
+                    <h3 class="text-lg font-bold text-base-dark">Manajemen Kriteria</h3>
+                    <p class="text-sm text-base-medium mt-1">Konfigurasi bobot dan atribut kriteria TOPSIS. (Struktur kriteria dikunci).</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gray-50 px-4 py-2 rounded-lg border border-gray-100 flex items-center shadow-sm">
+                        <span class="text-sm font-semibold text-gray-600 mr-2">Total Bobot:</span>
+                        <span class="text-lg font-bold {{ $totalBobot == 100 ? 'text-green-600' : 'text-amber-500' }}">{{ $totalBobot }}%</span>
+                    </div>
+                </div>
         </div>
     </x-slot>
 
@@ -88,38 +91,10 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('manajer.kriteria.edit', $kriteria) }}" class="inline-flex items-center text-primary hover:text-primary-dark mr-4">
+                                <a href="{{ route('manajer.kriteria.edit', $kriteria) }}" class="inline-flex items-center text-primary hover:text-primary-dark">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                     Edit
                                 </a>
-                                
-                                <!-- Delete Modal Component (Alpine) -->
-                                <div x-data="{ open: false }" class="inline-block text-left">
-                                    <button @click="open = true" class="inline-flex items-center text-red-500 hover:text-red-700">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        Hapus
-                                    </button>
-                                    
-                                    <!-- Modal -->
-                                    <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-gray-900 bg-opacity-50 backdrop-blur-sm" x-cloak>
-                                        <div @click.away="open = false" class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-left border border-gray-100">
-                                            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4 text-red-600">
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                            </div>
-                                            <h3 class="text-lg font-bold text-base-dark mb-2">Konfirmasi Hapus</h3>
-                                            <p class="text-sm text-base-medium mb-6">Hapus Kriteria <strong>{{ $kriteria->kode_kriteria }}</strong>? Tindakan ini tidak dapat dibatalkan.</p>
-                                            
-                                            <div class="flex justify-end space-x-3">
-                                                <button @click="open = false" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">Batal</button>
-                                                <form action="{{ route('manajer.kriteria.destroy', $kriteria) }}" method="POST">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="px-4 py-2 bg-red-600 border border-transparent text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium shadow-sm">Hapus</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </td>
                         </tr>
                         @empty
