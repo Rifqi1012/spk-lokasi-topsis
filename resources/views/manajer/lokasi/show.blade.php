@@ -45,23 +45,44 @@
                             </div>
                         </div>
 
-                        <!-- FUTURE MAP INTEGRATION PLACEHOLDER -->
+                        <!-- Read-only Map Integration -->
                         <div class="mt-8 pt-6 border-t border-gray-100">
-                            <h3 class="text-lg font-bold text-base-dark mb-4 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                Peta Lokasi
-                            </h3>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold text-base-dark flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    Peta Lokasi
+                                </h3>
+                                @if($lokasi->latitude && $lokasi->longitude)
+                                    <a href="https://www.google.com/maps?q={{ $lokasi->latitude }},{{ $lokasi->longitude }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-md text-xs font-semibold transition-colors">
+                                        Buka di Google Maps
+                                        <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    </a>
+                                @endif
+                            </div>
                             
                             @if($lokasi->latitude && $lokasi->longitude)
-                                <div class="w-full h-64 bg-gray-100 rounded-lg border border-gray-200 flex flex-col items-center justify-center text-gray-500">
-                                    <svg class="w-10 h-10 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-                                    <span class="text-sm">Peta interaktif akan ditampilkan di sini di masa mendatang.</span>
-                                    <span class="text-xs text-gray-400 mt-1">Lat: {{ $lokasi->latitude }}, Lng: {{ $lokasi->longitude }}</span>
+                                <div class="relative w-full rounded-lg border border-gray-300 shadow-sm overflow-hidden h-[300px] md:h-[350px] lg:h-[450px]">
+                                    <div id="map-readonly-{{ $lokasi->id }}" class="w-full h-full z-0 relative bg-gray-50"></div>
+                                </div>
+                                <div class="mt-3 flex gap-4 text-sm">
+                                    <div class="bg-gray-50 px-3 py-2 rounded-md border border-gray-200">
+                                        <span class="font-medium text-gray-500">Latitude:</span> <span class="font-mono text-gray-800">{{ $lokasi->latitude }}</span>
+                                    </div>
+                                    <div class="bg-gray-50 px-3 py-2 rounded-md border border-gray-200">
+                                        <span class="font-medium text-gray-500">Longitude:</span> <span class="font-mono text-gray-800">{{ $lokasi->longitude }}</span>
+                                    </div>
                                 </div>
                             @else
-                                <div class="w-full p-4 bg-yellow-50 border border-yellow-100 rounded-lg text-sm text-yellow-700 flex items-start">
-                                    <svg class="w-5 h-5 mr-2 flex-shrink-0 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <span>Koordinat latitude dan longitude belum diisi. Peta tidak dapat ditampilkan.</span>
+                                <div class="w-full flex flex-col items-center justify-center p-8 bg-gray-50 border border-gray-200 rounded-lg text-center">
+                                    <div class="w-16 h-16 mb-4 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <line x1="4" y1="4" x2="20" y2="20" stroke-width="2" stroke-linecap="round"></line>
+                                        </svg>
+                                    </div>
+                                    <h4 class="text-sm font-semibold text-gray-800 mb-1">Koordinat Lokasi Belum Tersedia</h4>
+                                    <p class="text-xs text-gray-500 max-w-sm">Peta tidak dapat ditampilkan karena titik koordinat latitude dan longitude belum diinputkan untuk lokasi ini.</p>
                                 </div>
                             @endif
                         </div>
@@ -107,4 +128,52 @@
             </div>
         </div>
     </div>
+
+    @push('styles')
+    @if($lokasi->latitude && $lokasi->longitude)
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        [id^="map-"] { min-height: 300px; }
+    </style>
+    @endif
+    @endpush
+
+    @push('scripts')
+    @if($lokasi->latitude && $lokasi->longitude)
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mapContainer = document.getElementById('map-readonly-{{ $lokasi->id }}');
+            if (!mapContainer || mapContainer._leaflet_id) return;
+            
+            const map = L.map(mapContainer, {
+                dragging: false,
+                scrollWheelZoom: false,
+                touchZoom: false,
+                doubleClickZoom: false,
+                boxZoom: false,
+                keyboard: false,
+                zoomControl: true
+            }).setView([{{ $lokasi->latitude }}, {{ $lokasi->longitude }}], 15);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            
+            const greenIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41], 
+                iconAnchor: [12, 41], 
+                popupAnchor: [1, -34], 
+                shadowSize: [41, 41]
+            });
+            
+            L.marker([{{ $lokasi->latitude }}, {{ $lokasi->longitude }}], { icon: greenIcon }).addTo(map);
+            
+            setTimeout(() => map.invalidateSize(), 200);
+        });
+    </script>
+    @endif
+    @endpush
 </x-app-layout>

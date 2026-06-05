@@ -9,6 +9,9 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <!-- Custom Styles -->
+        @stack('styles')
     </head>
     <body class="font-sans antialiased bg-base-light text-base-dark h-screen overflow-hidden flex" x-data="{ sidebarOpen: false }">
         
@@ -79,8 +82,12 @@
                 @endcan
 
                 @can('view rekomendasi')
+                <x-sidebar-link :href="route('direktur.observasi.index')" :active="request()->routeIs('direktur.observasi.*')" icon="clipboard">
+                    {{ __('Hasil Observasi') }}
+                </x-sidebar-link>
+
                 <x-sidebar-link :href="route('direktur.rekomendasi.index')" :active="request()->routeIs('direktur.rekomendasi.*')" icon="chart-bar">
-                    Hasil Rekomendasi
+                    {{ __('Hasil Rekomendasi') }}
                 </x-sidebar-link>
                 @endcan
             </div>
@@ -142,5 +149,7 @@
             </main>
         </div>
         
+        <!-- Custom Scripts -->
+        @stack('scripts')
     </body>
 </html>

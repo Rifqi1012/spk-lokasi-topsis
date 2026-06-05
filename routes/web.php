@@ -6,6 +6,7 @@ use App\Http\Controllers\Manajer\DashboardController as ManajerDashboardControll
 use App\Http\Controllers\Manajer\HasilController as ManajerHasilController;
 use App\Http\Controllers\Direktur\DashboardController as DirekturDashboardController;
 use App\Http\Controllers\Direktur\RekomendasiController as DirekturRekomendasiController;
+use App\Http\Controllers\Direktur\ObservasiController as DirekturObservasiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -54,11 +55,16 @@ Route::middleware(['auth', 'verified', 'role:direktur'])->prefix('direktur')->na
         ->name('dashboard')
         ->middleware('permission:view dashboard');
 
-    Route::prefix('rekomendasi')->name('rekomendasi.')->middleware('permission:view rekomendasi')->group(function() {
+    Route::prefix('rekomendasi')->name('rekomendasi.')->group(function() {
         Route::get('/', [DirekturRekomendasiController::class, 'index'])->name('index');
         Route::get('/export/pdf', [DirekturRekomendasiController::class, 'exportPdf'])->name('export.pdf');
         Route::get('/export/excel', [DirekturRekomendasiController::class, 'exportExcel'])->name('export.excel');
         Route::get('/{id}', [DirekturRekomendasiController::class, 'show'])->name('show');
+    });
+
+    Route::prefix('observasi')->name('observasi.')->group(function() {
+        Route::get('/', [DirekturObservasiController::class, 'index'])->name('index');
+        Route::get('/{id}', [DirekturObservasiController::class, 'show'])->name('show');
     });
 });
 
